@@ -11,10 +11,10 @@
 			this.ch = canvas.height;
 			this.location = [];
 			this.priceData = [20000, 60000, 0, 10000, 80000, 40000, 60000, 70000, 30000, 100000];
+			this.kan = this.cw / (this.priceData.length - 1);
 			this.setLocation();
 		}
 		setLocation() {
-			const kan = this.cw / (this.priceData.length - 1);
 			let x = 0; // 그래프의 x좌표
 			const dataOfpx1 = this.ch / Math.max(...this.priceData); // y좌표 1px 당 data값
 			for (let cnt = 0; cnt < this.priceData.length; cnt += 1) {
@@ -25,8 +25,9 @@
 						y: yPX,
 					}
 				);
-				x = x + kan;
+				x = x + this.kan;
 			}
+			console.log(this.location);
 		}
 		clear() {
 			this.ctx.clearRect(0, 0, this.cw, this.ch);
@@ -37,48 +38,64 @@
 			super();
 			this.fillColor = '#B3ACFF';
 			this.cnt = 1;
+			this.nowX = this.location[this.cnt - 1].x;
+			this.nowY = this.location[this.cnt - 1].y;
+			this.x = this.location[this.cnt - 1].x;
+			this.y = this.location[this.cnt - 1].y;
+			this.nextX = this.location[this.cnt].x;
+			this.nextY = this.location[this.cnt].y;
+			this.dir = '';
+			this.x1 = 0;
+			this.iterCnt = 0;
 		}
-		fillOne() {
-			this.ctx.save();
+		fill() {
 			this.ctx.fillStyle = this.fillColor;
-			const maxY = Math.max(...[this.location[this.cnt - 1].y, this.location[this.cnt].y]);
-			const minY = Math.min(...[this.location[this.cnt - 1].y, this.location[this.cnt].y]);
-			const max = maxY - minY;
-			let aniY = this.location[this.cnt - 1].y;
-			let aniX = this.location[this.cnt - 1].x;
-			let x1 = this.location[this.cnt].x / max;
-			console.log(x1);
+			this.ctx.save();
 			this.ctx.beginPath();
-			console.log(aniX, aniY);
-			console.log(aniX + x1, aniY - 1);
-			console.log(aniX + x1, 500);
-			console.log(0, 500);
-			this.ctx.lineTo(aniX, aniY);
-			this.ctx.lineTo(aniX + x1, aniY - 1);
-			this.ctx.lineTo(aniX + x1, 500);
-			this.ctx.lineTo(0, 500);
+			console.log(this.cnt);
+			console.log(`1: (${this.nowX}, ${this.nowY}), 2: (${this.nowX + this.x1}, ${eval(`${this.nowY}${this.dir}1`)}), 3: (${this.nowX + this.x1}, ${this.ch}), 4: (0, ${this.ch})`)
+			this.ctx.lineTo(this.nowX.toFixed(0), this.nowY.toFixed(0));
+			this.ctx.lineTo((this.nowX + this.x1).toFixed(0), eval(`${this.nowY}${this.dir}1`).toFixed(0));
+			this.ctx.lineTo((this.nowX + this.x1).toFixed(0), this.ch.toFixed(0));
+			this.ctx.lineTo(this.x.toFixed(0), this.ch.toFixed(0));
 			this.ctx.closePath();
 			this.ctx.fill();
-			aniX += x1;
-			aniY -= 1;
-			if (minY <= aniY) {
-				requestAnimationFrame(() => {
+		}
+		* run() {
+			for (let x = 0; x < 300; x += 1) {
+				yield new Promise((resolve) => {
 					setTimeout(() => {
-						this.fillOne();
-					}, 10);
+						resolve();
+					}, 1);
 				});
 			}
 		}
-		display() {
-			// if (this.cnt < this.location.length - 1) {
-			// 	requestAnimationFrame(() => {
-			// 		setTimeout(() => {
-			// 			this.display();
-			// 		}, 60);
-			// 	});
-			// }
-			this.fillOne();
-			this.cnt += 1;
+		async	display() {
+			for (; this.cnt < this.location.length;) {
+				if (this.y > this.nextY) {
+					this.dir = '-';
+					this.iterCnt = this.y - this.nextY;
+				} else {
+					this.dir = '+';
+					this.iterCnt = this.nextY - this.y;
+				}
+				this.x1 = this.kan / 300;
+				for await (const f of this.run()) {
+					// console.log(this.nowX, this.nowY);
+					this.fill();
+					this.nowX += this.x1;
+					this.nowY = this.nowY + ((this.nextY - this.y) / 300);
+				}
+				// console.log('현재 x 좌표: ', this.nowX);
+				// console.log('다음');
+				this.cnt += 1;
+				this.x = this.location[this.cnt - 1].x;
+				this.y = this.location[this.cnt - 1].y;
+				if (this.location[this.cnt]) {
+					this.nextX = this.location[this.cnt].x;
+					this.nextY = this.location[this.cnt].y;
+				}
+			}
 		}
 	}
 

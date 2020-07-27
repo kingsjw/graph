@@ -7,10 +7,11 @@
 			this.ctx = canvas.getContext('2d');
 			this.ctx.lineWidth = 1;
 			this.ctx.lineCap = 'round';
+			this.ctx.globalCompositeOperation='destination-over';
 			this.cw = canvas.width;
 			this.ch = canvas.height;
 			this.location = [];
-			this.priceData = [20000, 60000, 0, 10000, 80000, 40000, 60000, 70000, 30000, 100000];
+			this.priceData = [20000, 60000, 5000, 10000, 80000, 40000, 60000, 70000, 30000, 10000, 50000, 4000, 65000, 72000];
 			this.kan = this.cw / (this.priceData.length - 1);
 			this.setLocation();
 		}
@@ -52,14 +53,16 @@
 			this.ctx.fillStyle = this.fillColor;
 			this.ctx.save();
 			this.ctx.beginPath();
-			console.log(this.cnt);
-			console.log(`1: (${this.nowX}, ${this.nowY}), 2: (${this.nowX + this.x1}, ${eval(`${this.nowY}${this.dir}1`)}), 3: (${this.nowX + this.x1}, ${this.ch}), 4: (0, ${this.ch})`)
+			// console.log(this.cnt);
+			// console.log(`1: (${this.nowX}, ${this.nowY}), 2: (${this.nowX + this.x1}, ${eval(`${this.nowY}${this.dir}1`)}), 3: (${this.nowX + this.x1}, ${this.ch}), 4: (0, ${this.ch})`)
 			this.ctx.lineTo(this.nowX.toFixed(0), this.nowY.toFixed(0));
 			this.ctx.lineTo((this.nowX + this.x1).toFixed(0), eval(`${this.nowY}${this.dir}1`).toFixed(0));
 			this.ctx.lineTo((this.nowX + this.x1).toFixed(0), this.ch.toFixed(0));
 			this.ctx.lineTo(this.x.toFixed(0), this.ch.toFixed(0));
 			this.ctx.closePath();
 			this.ctx.fill();
+			// this.ctx.clip();
+			// this.ctx.restore();
 		}
 		* run() {
 			for (let x = 0; x < 300; x += 1) {
@@ -81,13 +84,10 @@
 				}
 				this.x1 = this.kan / 300;
 				for await (const f of this.run()) {
-					// console.log(this.nowX, this.nowY);
 					this.fill();
 					this.nowX += this.x1;
 					this.nowY = this.nowY + ((this.nextY - this.y) / 300);
 				}
-				// console.log('현재 x 좌표: ', this.nowX);
-				// console.log('다음');
 				this.cnt += 1;
 				this.x = this.location[this.cnt - 1].x;
 				this.y = this.location[this.cnt - 1].y;

@@ -141,9 +141,8 @@
 			this.dataAppend();
 		}
 		dataAppend() {
-			const timeArr = Object.values(rangeObj).filter(v => v);
-			console.log(timeArr);
-			const priceArr = (timeArr[0] !== timeArr[1] ? priceData.slice(timeArr[0] - 1, timeArr[1] - 1) : [priceData[timeArr[0] - 1]]).toString();
+			const timeArr = Object.values(rangeObj).filter(v => v).sort((a, b) => a - b);
+			const priceArr = (timeArr.length > 1 && timeArr[0] !== timeArr[1] ? priceData.slice(timeArr[0] - 1, timeArr[1] - 1) : [priceData[timeArr[0] - 1]]).toString();
 			const innerHTML = `
 				범위: ${timeArr.toString().replace(',', ' ~ ')}
 				<br>

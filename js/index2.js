@@ -13,7 +13,7 @@
 	const priceData = [];
 	const time = 24;
 	for (let x = 0; x < time; x += 1) {
-		const data = Math.floor(Math.random() * (1000000 - 10000)) + 10000;
+		const data = Math.floor(Math.random() * (100 - 10)) + 10;
 		priceData.push(data);
 	}
 	let x = 0;
@@ -29,6 +29,8 @@
 		);
 		x = x + padding;
 	}
+	let selectCnt1 = null;
+	let selectCnt2 = null;
 	class Polygon {
 		constructor() {
 			this.lineColor = 'rgba(0,0,0,0)';
@@ -87,26 +89,24 @@
 			this.isDrag = false;
 			this.x1 = 0;
 			this.x2 = 0;
-			this.selectCnt1 = null;
-			this.selectCnt2 = null;
 			rangeCanvas.addEventListener('mousedown', (e) => {
 				this.clear();
 				this.x1 = e.offsetX;
-				this.selectCnt1 = Math.ceil(this.x1 / padding);
+				selectCnt1 = Math.ceil(this.x1 / padding);
 				this.isDrag = true;
 			});
 			rangeCanvas.addEventListener('mouseup', (e) => {
 				this.x2 = e.offsetX;
 				this.isDrag = false;
-				this.selectCnt2 = Math.ceil(this.x2 / padding);
+				selectCnt2 = Math.ceil(this.x2 / padding);
 				this.fill();
-				this,selectCnt1 = null;
-				this.selectCnt2 = null;
+				selectCnt1 = null;
+				selectCnt2 = null;
 			});
 			rangeCanvas.addEventListener('mousemove', (e) => {
 				if (this.isDrag) {
 					this.x2 = e.offsetX;
-					this.selectCnt2 = Math.ceil(this.x2 / padding);
+					selectCnt2 = Math.ceil(this.x2 / padding);
 					this.fill();
 				}
 			});
@@ -114,8 +114,8 @@
 		fill() {
 			this.clear();
 			rangeCtx.fillStyle = this.fillColor;
-			const startX = this.selectCnt1 < this.selectCnt2 ? this.selectCnt1 - 1 : this.selectCnt1;
-			const lastX = this.selectCnt1 < this.selectCnt2 ? this.selectCnt2 : this.selectCnt2 - 1;
+			const startX = selectCnt1 < selectCnt2 ? selectCnt1 - 1 : selectCnt1;
+			const lastX = selectCnt1 < selectCnt2 ? selectCnt2 : selectCnt2 - 1;
 			if (location[startX] && location[lastX]) {
 				rangeCtx.beginPath();
 				rangeCtx.moveTo(location[startX].x, 0);
@@ -136,6 +136,5 @@
 		let polygon = new Polygon();
 		polygon.animate();
 		new Range();
-		// range.display();
 	};
 })();

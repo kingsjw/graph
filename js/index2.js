@@ -29,8 +29,10 @@
 		);
 		x = x + padding;
 	}
-	let selectCnt1 = null;
-	let selectCnt2 = null;
+	let rangeObj = {
+		start: null,
+		last: null,
+	}
 	class Polygon {
 		constructor() {
 			this.lineColor = 'rgba(0,0,0,0)';
@@ -90,34 +92,39 @@
 			this.x1 = 0;
 			this.x2 = 0;
 			rangeCanvas.addEventListener('mousedown', (e) => {
-				this.clear();
 				this.x1 = e.offsetX;
-				selectCnt1 = Math.ceil(this.x1 / padding);
+				rangeObj.start = Math.ceil(this.x1 / padding);
 				this.isDrag = true;
 				this.fill();
 			});
 			rangeCanvas.addEventListener('mouseup', (e) => {
-				this.x2 = e.offsetX;
-				this.isDrag = false;
-				selectCnt2 = Math.ceil(this.x2 / padding);
-				this.fill();
-				selectCnt1 = null;
-				selectCnt2 = null;
-			});
-			rangeCanvas.addEventListener('mousemove', (e) => {
 				if (this.isDrag) {
 					this.x2 = e.offsetX;
-					selectCnt2 = Math.ceil(this.x2 / padding);
+					rangeObj.last = Math.ceil(this.x2 / padding);
 					this.fill();
+					this.isDrag = false;
+				}
+			});
+			document.body.addEventListener('mousemove', (e) => {
+				if (this.isDrag && e.target.tagName === 'CANVAS') {
+					this.x2 = e.offsetX > 0 ? e.offsetX : 1;
+					rangeObj.last = Math.ceil(this.x2 / padding);
+					this.fill();
+				} else {
+					this.isDrag = false;
+					rangeObj = {
+						start: null,
+						last: null,
+					};
 				}
 			});
 		}
 		fill() {
-			this.clear();
 			rangeCtx.fillStyle = this.fillColor;
-			const startX = selectCnt1 ? selectCnt1 < selectCnt2 ? selectCnt1 - 1 : selectCnt1 : null;
-			const lastX = selectCnt2 ? selectCnt1 < selectCnt2 ? selectCnt2 : selectCnt2 - 1 : null;
+			const startX = rangeObj.start ? rangeObj.start < rangeObj.last ? rangeObj.start - 1 : rangeObj.start : null;
+			const lastX = rangeObj.last ? rangeObj.start < rangeObj.last ? rangeObj.last : rangeObj.last - 1 : null;
 			if (location[startX] && location[lastX]) {
+				this.clear();
 				rangeCtx.beginPath();
 				rangeCtx.moveTo(location[startX].x, 0);
 				rangeCtx.lineTo(location[lastX].x, 0);
@@ -128,8 +135,20 @@
 				rangeCtx.fill();
 			}
 			if (location[startX] && !location[lastX]) {
-				rangeCtx.fillRect(location[selectCnt1 - 1].x, 0, Math.abs(location[selectCnt1].x - location[selectCnt1 - 1].x), ch);
+				this.clear();
+				rangeCtx.fillRect(location[rangeObj.start - 1].x, 0, Math.abs(location[rangeObj.start].x - location[rangeObj.start - 1].x), ch);
 			}
+			this.dataAppend();
+		}
+		dataAppend() {
+			const timeArr = [rangeObj.start, rangeObj.last].sort((a, b) => a - b);
+			const priceArr = (timeArr[0] !== timeArr[1] ? priceData.slice(timeArr[0] - 1, timeArr[1] - 1) : [priceData[timeArr[0] - 1]]).toString();
+			const innerHTML = `
+				범위: ${timeArr[0]} ~ ${timeArr[1]}
+				<br>
+				값: ${priceArr}
+				`;
+			document.body.querySelector('.listWrap .list').innerHTML = innerHTML;
 		}
 		clear() {
 			rangeCtx.clearRect(0, 0, cw, ch);

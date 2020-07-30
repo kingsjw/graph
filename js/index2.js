@@ -94,6 +94,7 @@
 				this.x1 = e.offsetX;
 				selectCnt1 = Math.ceil(this.x1 / padding);
 				this.isDrag = true;
+				this.fill();
 			});
 			rangeCanvas.addEventListener('mouseup', (e) => {
 				this.x2 = e.offsetX;
@@ -114,8 +115,8 @@
 		fill() {
 			this.clear();
 			rangeCtx.fillStyle = this.fillColor;
-			const startX = selectCnt1 < selectCnt2 ? selectCnt1 - 1 : selectCnt1;
-			const lastX = selectCnt1 < selectCnt2 ? selectCnt2 : selectCnt2 - 1;
+			const startX = selectCnt1 ? selectCnt1 < selectCnt2 ? selectCnt1 - 1 : selectCnt1 : null;
+			const lastX = selectCnt2 ? selectCnt1 < selectCnt2 ? selectCnt2 : selectCnt2 - 1 : null;
 			if (location[startX] && location[lastX]) {
 				rangeCtx.beginPath();
 				rangeCtx.moveTo(location[startX].x, 0);
@@ -125,6 +126,9 @@
 				rangeCtx.lineTo(location[startX].x, 0);
 				rangeCtx.closePath();
 				rangeCtx.fill();
+			}
+			if (location[startX] && !location[lastX]) {
+				rangeCtx.fillRect(location[selectCnt1 - 1].x, 0, Math.abs(location[selectCnt1].x - location[selectCnt1 - 1].x), ch);
 			}
 		}
 		clear() {

@@ -141,10 +141,11 @@
 			this.dataAppend();
 		}
 		dataAppend() {
-			const timeArr = [rangeObj.start, rangeObj.last].sort((a, b) => a - b);
+			const timeArr = Object.values(rangeObj).filter(v => v);
+			console.log(timeArr);
 			const priceArr = (timeArr[0] !== timeArr[1] ? priceData.slice(timeArr[0] - 1, timeArr[1] - 1) : [priceData[timeArr[0] - 1]]).toString();
 			const innerHTML = `
-				범위: ${timeArr[0]} ~ ${timeArr[1]}
+				범위: ${timeArr.toString().replace(',', ' ~ ')}
 				<br>
 				값: ${priceArr}
 				`;
